@@ -1,0 +1,5 @@
+- name: tess_and_linus
+  platform: group
+  services:
+    - service: mobile_app_linus_phone
+    - service: mobile_app_pixel_3

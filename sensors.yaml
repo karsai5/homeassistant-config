@@ -1,0 +1,53 @@
+- platform: sonarr_upcoming_media
+  api_key: !secret sonar_api_key
+  host: 192.168.1.32
+  port: 8989
+  days: 7
+  ssl: false
+  max: 10
+- platform: plex_recently_added
+  token: !secret plex_token
+  host: 192.168.1.32
+  port: 32400
+- platform: darksky
+  api_key: !secret darksky_api_key
+  forecast:
+    - 0
+  hourly_forecast:
+    - 0
+    - 1
+    - 3
+    - 6
+    - 9
+    - 12
+  monitored_conditions:
+    - summary
+    - icon
+    - temperature
+    - precip_type
+    - precip_intensity
+    - precip_probability
+- platform: template
+  sensors:
+    number_cool_persons_at_home:
+      friendly_name: "The coolest folks at home"
+      value_template: >
+        {{ [states.person.sam, states.person.linus, states.person.till, states.person.tess]
+            | selectattr('state', '==', 'home') | list | count }}
+    linus_work_laptop_active_inputs:
+      friendly_name: "The number of active input devices on linus work laptop"
+      value_template: >
+        {{ [states.binary_sensor.c02wd04whtdg_logitech_webcam_c930e_2, states.binary_sensor.c02wd04whtdg_facetime_hd_camera_built_in, states.binary_sensor.c02wd04whtdg_built_in_microphone, states.binary_sensor.c02wd04whtdg_blue_snowball]
+            | selectattr('state', '==', 'on') | list | count }}
+    all_lights_off:
+      friendly_name: "Are all the lights off"
+      value_template: >
+        {% set domain = 'light' %}
+        {{ states[domain] | count == states[domain] | selectattr('state','!=', 'on') | list | count }}
+    house_asleep:
+      friendly_name: "The house is asleep"
+      value_template: >
+        {% set lightsOff =  is_state('sensor.all_lights_off', 'True')%}
+        {% set tvIsOff = not is_state('media_player.living_room_tv', 'on')%}
+        {% set sunIsBelowHorizon = is_state("sun.sun", "below_horizon")%}
+        {{ lightsOff | bitwise_and(tvIsOff) | bitwise_and(sunIsBelowHorizon)}}

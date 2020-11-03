@@ -1,0 +1,154 @@
+- id: '1604272640346'
+  alias: Turn on on air light with on air switch
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_boolean.in_a_call
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.in_a_call
+        state: 'on'
+      sequence:
+      - type: turn_on
+        device_id: 17f634cd45246a72b5c0e65f41c3d7c0
+        entity_id: switch.77153011d8f15be6a6d8
+        domain: switch
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.in_a_call
+        state: 'off'
+      sequence:
+      - type: turn_off
+        device_id: 17f634cd45246a72b5c0e65f41c3d7c0
+        entity_id: switch.77153011d8f15be6a6d8
+        domain: switch
+    default: []
+  mode: single
+- id: '1604275237051'
+  alias: Notify if it rains when the washing is out
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.dark_sky_precip
+    to: rain
+  condition:
+  - condition: state
+    entity_id: input_boolean.washing_out
+    state: 'On'
+  action:
+  - service: notify.tess_and_linus
+    data:
+      title: It's Raining ☔️☔️
+      message: Your washing is getting wet!
+  mode: single
+- id: '1604310937163'
+  alias: Notify when play station is left on
+  description: Will notify when the play station is left on for 10 minutes after the
+    tv is turned on or input changed
+  trigger:
+  - platform: state
+    entity_id: media_player.living_room_tv
+    attribute: source
+    from: Play station
+    for: 00:10:00
+  - platform: state
+    entity_id: media_player.living_room_tv
+    to: 'off'
+    for: 00:10:00
+  condition:
+  - condition: not
+    conditions:
+    - condition: state
+      entity_id: media_player.playstation_4
+      state: 'off'
+  action:
+  - service: notify.mobile_app_linus_phone
+    data:
+      title: Inactive playstation
+      message: The play station no longer seems to be in use. It has been put into
+        rest mode however you might want to turn it off to save power.
+  mode: single
+- id: '1604311100803'
+  alias: 'Notification: Turn off playstation'
+  description: ''
+  trigger:
+  - platform: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: turn_off_playstation
+  condition: []
+  action:
+  - service: media_player.turn_off
+    data: {}
+    entity_id: media_player.playstation_4
+  mode: single
+- id: '1604312410344'
+  alias: Turn off lounge light when the TV is turned on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: media_player.living_room_tv
+    to: 'on'
+  condition: []
+  action:
+  - service: light.turn_off
+    data: {}
+    entity_id: light.ikea_lamp
+  mode: single
+- id: '1604361053055'
+  alias: 'WorkLaptop: On Air for video calls'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.linus_work_laptop_active_inputs
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.linus_work_laptop_active_inputs
+        above: '0'
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        entity_id: input_boolean.in_a_call
+    - conditions:
+      - condition: state
+        entity_id: sensor.linus_work_laptop_active_inputs
+        state: '0'
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        entity_id: input_boolean.in_a_call
+    default: []
+  mode: single
+- id: '1604361053713'
+  alias: 'WorkLaptop: On Air for video calls'
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.linus_work_laptop_active_inputs
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: numeric_state
+        entity_id: sensor.linus_work_laptop_active_inputs
+        above: '1'
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        entity_id: input_boolean.in_a_call
+    - conditions:
+      - condition: state
+        entity_id: sensor.linus_work_laptop_active_inputs
+        state: '0'
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        entity_id: input_boolean.in_a_call
+    default: []
+  mode: single

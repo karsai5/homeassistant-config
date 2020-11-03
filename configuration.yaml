@@ -1,0 +1,55 @@
+default_config:
+wake_on_lan:
+shopping_list:
+
+recorder:
+  purge_keep_days: 30
+  db_url: !secret maria_db_url
+
+tts:
+  - platform: google_translate
+
+webostv:
+  host: 192.168.1.12
+  turn_on_action:
+    service: wake_on_lan.send_magic_packet
+    data:
+      mac: 00:51:ED:C5:57:86
+  name: Living Room TV
+  customize:
+    sources:
+      - Amazon Prime Video
+      - Apple tv
+      - Netflix
+      - Play station
+      - Plex
+      - Stan
+      - Switch
+      - YouTube
+
+spotify:
+  client_id: !secret spotify_client_id
+  client_secret: !secret spotify_client_secret
+
+google_assistant:
+  project_id: hassio-home-assistant-288123
+  service_account: !include service-account.json
+  report_state: true
+  exposed_domains:
+    - switch
+    - light
+
+device_tracker:
+  - platform: tomato
+    host: 192.168.1.1
+    username: !secret router_username
+    password: !secret router_password
+    http_id: !secret router_http_id
+
+
+automation: !include automations.yaml
+group: !include groups.yaml
+notify: !include notifies.yaml
+scene: !include scenes.yaml
+script: !include scripts.yaml
+sensor: !include sensors.yaml
