@@ -61,9 +61,14 @@
   condition:
   - condition: not
     conditions:
-    - condition: state
-      entity_id: media_player.playstation_4
-      state: 'off'
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: media_player.playstation_4
+        state: standby
+      - condition: state
+        entity_id: media_player.playstation_4
+        state: 'off'
   action:
   - service: notify.mobile_app_linus_phone
     data:
