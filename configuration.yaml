@@ -7,7 +7,8 @@ recorder:
   db_url: !secret maria_db_url
 
 tts:
-  - platform: google_translate
+  - platform: marytts
+    host: 192.168.1.32
 
 webostv:
   host: 192.168.1.12
@@ -30,6 +31,10 @@ webostv:
 spotify:
   client_id: !secret spotify_client_id
   client_secret: !secret spotify_client_secret
+  
+spotcast:
+  sp_dc: !secret sp_dc
+  sp_key: !secret sp_key
 
 google_assistant:
   project_id: hassio-home-assistant-288123
@@ -46,9 +51,30 @@ device_tracker:
     password: !secret router_password
     http_id: !secret router_http_id
 
+anniversaries:
+  sensors:
+    - name: Move In Date
+      date: "2020-11-20"
+      
+influxdb:
+  host: a0d7b954-influxdb
+  port: 8086
+  database: homeassistant
+  username: homeassistant
+  password: homeassistantpassword
+  max_retries: 3
+  default_measurement: state
+
+telegram_bot:
+  - platform: webhooks
+    api_key: !secret telegram_bot_api_key
+    allowed_chat_ids:
+      - !secret linus_telegram_chat_id
 
 automation: !include automations.yaml
+binary_sensor: !include binarysensors.yaml
 group: !include groups.yaml
+light: !include lights.yaml
 notify: !include notifies.yaml
 scene: !include scenes.yaml
 script: !include scripts.yaml

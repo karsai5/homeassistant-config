@@ -1,0 +1,21 @@
+- platform: switch
+  name: On Air
+  entity_id: switch.77153011d8f15be6a6d8
+- platform: switch
+  name: Salt rock lamp
+  entity_id: switch.salt_rock_lamp
+- platform: switch
+  name: TL Fairy lights
+  entity_id: switch.bedroom_fairy_lights
+- platform: group
+  name: Livingroom lights
+  entities:
+    - light.lounge_light
+    - light.dining_table_light
+    - light.salt_rock_lamp
+- platform: group
+  name: Nook lights
+  entities:
+    - light.green_lamp_light
+    - light.nook_general_light
+    - light.birdie_light

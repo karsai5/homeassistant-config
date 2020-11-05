@@ -9,6 +9,10 @@
   token: !secret plex_token
   host: 192.168.1.32
   port: 32400
+- platform: transport_nsw
+  name: 'Train'
+  stop_id: '10101114'
+  api_key: !secret transport_nsw_api_key
 - platform: darksky
   api_key: !secret darksky_api_key
   forecast:
@@ -27,6 +31,8 @@
     - precip_type
     - precip_intensity
     - precip_probability
+    - cloud_cover
+    - temperature_high
 - platform: template
   sensors:
     number_cool_persons_at_home:
@@ -51,3 +57,8 @@
         {% set tvIsOff = not is_state('media_player.living_room_tv', 'on')%}
         {% set sunIsBelowHorizon = is_state("sun.sun", "below_horizon")%}
         {{ lightsOff | bitwise_and(tvIsOff) | bitwise_and(sunIsBelowHorizon)}}
+    linus_in_car:
+      friendly_name: "Is linus in his car"
+      value_template: >
+        {{'74:5E:1C:B6:C6:F9' in state_attr("sensor.linus_phone_bluetooth_connection", "connected_paired_devices")}}
+ 

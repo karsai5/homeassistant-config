@@ -3,3 +3,6 @@
   services:
     - service: mobile_app_linus_phone
     - service: mobile_app_pixel_3
+- name: telegram_linus
+  platform: telegram
+  chat_id: !secret linus_telegram_chat_id

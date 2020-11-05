@@ -1,30 +1,26 @@
 - id: '1604272640346'
-  alias: Turn on on air light with on air switch
+  alias: Alfie-clickSingle -> Turn on on air light with on air switch
   description: ''
   trigger:
-  - platform: state
-    entity_id: input_boolean.in_a_call
+  - platform: mqtt
+    topic: zigbee2mqtt/alfie/click
   condition: []
   action:
   - choose:
     - conditions:
-      - condition: state
-        entity_id: input_boolean.in_a_call
-        state: 'on'
+      - condition: template
+        value_template: '{{trigger.payload == "single"}}'
       sequence:
-      - type: turn_on
-        device_id: 17f634cd45246a72b5c0e65f41c3d7c0
-        entity_id: switch.77153011d8f15be6a6d8
-        domain: switch
+      - service: input_boolean.toggle
+        data: {}
+        entity_id: input_boolean.in_a_call
     - conditions:
-      - condition: state
-        entity_id: input_boolean.in_a_call
-        state: 'off'
+      - condition: template
+        value_template: '{{trigger.payload == "double"}}'
       sequence:
-      - type: turn_off
-        device_id: 17f634cd45246a72b5c0e65f41c3d7c0
-        entity_id: switch.77153011d8f15be6a6d8
-        domain: switch
+      - service: light.toggle
+        data: {}
+        entity_id: light.nook_lights
     default: []
   mode: single
 - id: '1604275237051'
@@ -61,23 +57,21 @@
   condition:
   - condition: not
     conditions:
-    - condition: or
-      conditions:
-      - condition: state
-        entity_id: media_player.playstation_4
-        state: standby
-      - condition: state
-        entity_id: media_player.playstation_4
-        state: 'off'
+    - condition: template
+      value_template: '{{states("media_player.playstation_4") in [''unknown'', ''off'',
+        ''standby'']}}'
   action:
   - service: notify.mobile_app_linus_phone
     data:
       title: Inactive playstation
       message: The play station no longer seems to be in use. It has been put into
         rest mode however you might want to turn it off to save power.
-  mode: single
+  - service: media_player.turn_off
+    data: {}
+    entity_id: media_player.playstation_4
+  mode: restart
 - id: '1604311100803'
-  alias: 'Notification: Turn off playstation'
+  alias: 'NotificationAction: Turn off playstation'
   description: ''
   trigger:
   - platform: event
@@ -156,4 +150,300 @@
         data: {}
         entity_id: input_boolean.in_a_call
     default: []
+  mode: single
+- id: '1604448748417'
+  alias: 'Phillip-ClickSingle -> Toggle fairy lights in TL bedroom '
+  description: Or dismiss alarm
+  trigger:
+  - platform: device
+    domain: mqtt
+    device_id: cad7167dba40a057a0cd29de88ecf485
+    type: click
+    subtype: single
+    discovery_id: 0x00158d000402442d click_single
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: input_boolean.tl_bedroom_alarm
+        state: 'on'
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        entity_id: input_boolean.tl_bedroom_alarm
+      - service: tts.marytts_say
+        data:
+          entity_id: media_player.bedroom_speaker
+          message: 'Good morning! It''s currently {{states(''sensor.dark_sky_temperature'')}}degrees
+            outside and  {{states(''sensor.temp_temperature'')}} inside.  Today it
+            will be {{states(''sensor.dark_sky_summary_0d'')}}. It''s {{ states("sensor.anniversary_move_in_date")
+            }} days till you move into your new house!
+
+            '
+    default:
+    - service: light.toggle
+      data: {}
+      entity_id: light.tl_fairy_lights
+  mode: single
+- id: '1604449338952'
+  alias: 'Tracey click: Toggle lights in sam bedroom'
+  description: ''
+  trigger:
+  - platform: device
+    domain: mqtt
+    device_id: a2839fe7d01fffeb12e34339207b22ba
+    type: click
+    subtype: single
+    discovery_id: 0x00158d00044e8d5f click_single
+  condition: []
+  action:
+  - service: light.toggle
+    data: {}
+    entity_id: light.sams_bedroom_lamp_light
+  mode: single
+- id: '1604450778509'
+  alias: button-hue-on_press -> turn on lights
+  description: ''
+  trigger:
+  - platform: device
+    domain: mqtt
+    device_id: 63714d5dd926a614b2710e79b6919c9b
+    type: action
+    subtype: on-press
+    discovery_id: 0x00178801087535fd action_on-press
+  condition: []
+  action:
+  - service: light.turn_on
+    data: {}
+    entity_id: light.livingroom_lights
+  mode: single
+- id: '1604450887979'
+  alias: button-hue-off_press -> turn off lights
+  description: ''
+  trigger:
+  - platform: device
+    domain: mqtt
+    device_id: 63714d5dd926a614b2710e79b6919c9b
+    type: action
+    subtype: off-press
+    discovery_id: 0x00178801087535fd action_off-press
+  condition: []
+  action:
+  - service: light.turn_off
+    data: {}
+    entity_id: light.livingroom_lights
+  mode: single
+- id: '1604451137544'
+  alias: button-hue-down_press -> dim lights
+  description: ''
+  trigger:
+  - platform: device
+    domain: mqtt
+    device_id: 63714d5dd926a614b2710e79b6919c9b
+    type: action
+    subtype: down-press
+    discovery_id: 0x00178801087535fd action_down-press
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_step_pct: -20
+    entity_id: light.livingroom_lights
+  mode: single
+- id: '1604451181342'
+  alias: button-hue-up_press -> brighten lights
+  description: ''
+  trigger:
+  - platform: device
+    domain: mqtt
+    device_id: 63714d5dd926a614b2710e79b6919c9b
+    type: action
+    subtype: up-press
+    discovery_id: 0x00178801087535fd action_up-press
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_step_pct: 20
+    entity_id: light.livingroom_lights
+  mode: single
+- id: '1604458794547'
+  alias: Update car location when linus leaves his car
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.linus_in_car
+    to: 'False'
+    from: 'True'
+  condition: []
+  action:
+  - service: input_text.set_value
+    data:
+      value: '{{state_attr(''sensor.linus_phone_geocoded_location'', ''Thoroughfare'')}},
+        {{state_attr(''sensor.linus_phone_geocoded_location'', ''Locality'')}}'
+    entity_id: input_text.car_street
+  mode: single
+- id: '1604462800733'
+  alias: Notify if car is parked on street during workday
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_text.car_street
+    to: Greenwich Road, Greenwich
+    for: 02:00:00
+  - platform: time
+    at: 09:00:00
+  condition:
+  - condition: state
+    entity_id: binary_sensor.workday_sensor
+    state: 'on'
+  - condition: time
+    after: 07:00:00
+    before: '18:00:00'
+  - condition: state
+    entity_id: input_text.car_street
+    state: Greenwich Road, Greenwich
+  action:
+  - service: notify.mobile_app_linus_phone
+    data:
+      title: Car parked on street
+      message: It seems that the car is currently parked on Greenwich Rd during a
+        no parking period
+  mode: single
+- id: '1604467907385'
+  alias: TLBedroomAlarm-on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_boolean.tl_bedroom_alarm
+    to: 'on'
+  condition: []
+  action:
+  - service: script.ts_bedroom_alarm
+    data: {}
+  mode: single
+- id: '1604468015383'
+  alias: TLBedroomAlarm-off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: input_boolean.tl_bedroom_alarm
+    to: 'off'
+  condition: []
+  action:
+  - service: script.turn_off
+    data: {}
+    entity_id: script.ts_bedroom_alarm
+  - service: media_player.media_stop
+    data: {}
+    entity_id: media_player.bedroom_speaker
+  mode: single
+- id: '1604471010993'
+  alias: Phillip-DoubleSingle -> Snooze alarm
+  description: Or dismiss alarm
+  trigger:
+  - platform: device
+    domain: mqtt
+    device_id: cad7167dba40a057a0cd29de88ecf485
+    type: click
+    subtype: double
+    discovery_id: 0x00158d000402442d click_double
+  condition:
+  - condition: state
+    entity_id: input_boolean.tl_bedroom_alarm
+    state: 'on'
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    entity_id: input_boolean.tl_bedroom_alarm
+  - service: tts.marytts_say
+    data:
+      entity_id: media_player.bedroom_speaker
+      message: Alarm snoozed 10 minutes
+  - delay: 00:10:00
+  - service: input_boolean.turn_on
+    data: {}
+    entity_id: input_boolean.tl_bedroom_alarm
+  mode: single
+- id: '1604471753256'
+  alias: Weekday alarm
+  description: ''
+  trigger:
+  - platform: time
+    at: 07:00:00
+  condition:
+  - condition: state
+    entity_id: binary_sensor.workday_sensor
+    state: 'on'
+  action:
+  - service: input_boolean.turn_on
+    data: {}
+    entity_id: input_boolean.tl_bedroom_alarm
+  mode: single
+- id: '1604524555068'
+  alias: Notify at 6pm if it's going to rain overnight
+  description: ''
+  trigger:
+  - platform: time
+    at: '18:00:00'
+  condition:
+  - condition: template
+    value_template: "{{'rain' in [states('sensor.dark_sky_precip_1h'), \nstates('sensor.dark_sky_precip_3h'),\n\
+      states('sensor.dark_sky_precip_6h'),\nstates('sensor.dark_sky_precip_9h'), states('sensor.dark_sky_precip_12h')]}}"
+  - condition: state
+    entity_id: input_boolean.washing_out
+    state: 'on'
+  action:
+  - service: notify.persistent_notification
+    data:
+      title: Its forcast to rain tonight
+      message: If you currently have washing outside you may want to bring it in
+  - service: notify.mobile_app_linus_phone
+    data:
+      title: Its forcast to rain tonight
+      message: If you currently have washing outside you may want to bring it in
+  mode: single
+- id: '1604528342350'
+  alias: Say when linus' phone is ringing
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: sensor.sm_n960f_phone_state
+    to: ringing
+  condition:
+  - condition: state
+    entity_id: person.linus
+    state: home
+  action:
+  - service: media_player.volume_set
+    entity_id: media_player.nook_speaker
+    data:
+      volume_level: 0.4
+  - service: tts.marytts_say
+    data:
+      entity_id: media_player.nook_speaker
+      message: Hey Linus, your phone is currently ringing
+  mode: single
+- id: '1604612396419'
+  alias: Notify when someone comes home
+  description: ''
+  trigger:
+  - platform: zone
+    entity_id: person.linus
+    zone: zone.home
+    event: enter
+  - platform: zone
+    entity_id: person.sam
+    zone: zone.home
+    event: enter
+  - platform: zone
+    entity_id: person.tess
+    zone: zone.home
+    event: enter
+  condition: []
+  action:
+  - service: notify.telegram_linus
+    data:
+      message: '{{trigger.to_state.attributes.friendly_name}} has come home'
   mode: single

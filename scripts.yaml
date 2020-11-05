@@ -173,3 +173,15 @@ tv_and_plex:
         entity_id: media_player.living_room_tv
     default: []
   mode: single
+ts_bedroom_alarm:
+  alias: TL bedroom alarm
+  sequence:
+  - service: media_player.volume_set
+    data:
+      volume_level: 0.4
+    entity_id: media_player.bedroom_speaker
+  - service: spotcast.start
+    data:
+      entity_id: media_player.bedroom_speaker
+      uri: spotify:playlist:1HAiV5mPgRDOyaYGDDd3bM
+  mode: single

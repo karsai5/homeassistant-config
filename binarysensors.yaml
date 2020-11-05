@@ -1,0 +1,9 @@
+- platform: workday
+  country: AU
+  province: NSW
+- platform: command_line
+  command: /config/bashscripts/checkonline
+  device_class: connectivity
+  name: online
+  payload_on: "online"
+  payload_off: "offline"
